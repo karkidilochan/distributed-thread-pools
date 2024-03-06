@@ -76,4 +76,10 @@ public class ThreadPool {
             }
         }
     }
+
+    public boolean checkIfEmpty() {
+        return taskQueue.isEmpty();
+
+
+    }
 }

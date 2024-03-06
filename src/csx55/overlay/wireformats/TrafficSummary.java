@@ -123,7 +123,7 @@ public class TrafficSummary implements Event {
      * @return A string representing the traffic summary.
      */
     public String toString() {
-        return String.format("%1$20s %2$12s %3$10s %4$15s %5$15s %6$10s",
+        return String.format("%1$20s %2$12s %3$10s %4$15s %5$15s",
                 ipAddress + ":" + Integer.toString(portNumber),
                 Long.toString(generatedCount),
                 Long.toString(pulledCount),

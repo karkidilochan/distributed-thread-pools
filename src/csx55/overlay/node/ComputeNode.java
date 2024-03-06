@@ -340,27 +340,31 @@ public class ComputeNode implements Node, Protocol {
                     generatedTasks.add(task);
 
                 }
+
                 messageStatistics.addGenerated(noOfTasks);
+
 
                 /* now, first send no of tasks generated around the ring */
                 sendTasksCount(noOfTasks);
-                System.out.println("Sent tasks count to peers");
+
+                startThreadPool();
+//                System.out.println("Sent tasks count to peers");
 
                 /* then, wait for all tasks count and perform pair wise load balancing */
-                calculateMean();
-                balanceLoad();
+//                calculateMean();
+//                balanceLoad();
 
                 /*
                  * finally, start thread pool and wait for taskS to complete
                  */
                 // TODO: add a latch/semaphore to indicate if ready for execution
-                waitForTasksToComplete();
+                System.out.println("Done with round: " + round);
             }
 
             /*
              * send traffic summary to registry after tasks after all rounds are completed
              */
-            // sendTaskCompleteMessage();
+             sendTaskCompleteMessage();
 
         } catch (IOException e) {
             System.out.println("Error occurred while adding tasks to queue: " + e.getMessage());
@@ -496,9 +500,15 @@ public class ComputeNode implements Node, Protocol {
 
     private void waitForTasksToComplete() {
         /* check semaphore that is adjusted by the threadpool */
-        while (true) {
-            if (this.ROUND_COMPLETED.get()) {
-                break;
+
+        while(!this.threadPool.checkIfEmpty()) {
+            try {
+                // Sleep for 15 seconds to allow all messages to be received.
+                TimeUnit.SECONDS.sleep(10);
+                System.out.println("Waiting");
+            } catch (InterruptedException e) {
+                System.out.println("Thread sleep interrupted: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -723,12 +733,9 @@ public class ComputeNode implements Node, Protocol {
         threadPool.addTasks(generatedTasks);
         threadPool.addTasks(migratedTasks);
 
-        // this.threadPool.start();
-        System.out.println("Ready to start...");
-        System.out.println("Generated count: " + generatedTasks.size());
-        System.out.println("Migrated tasks: " + migratedTasks.size());
+         this.threadPool.start();
 
-        // waitForTasksToComplete();
+         waitForTasksToComplete();
     }
 
     public void notifyRoundComplete() {
@@ -748,6 +755,7 @@ public class ComputeNode implements Node, Protocol {
             System.out.println("Error occurred while sending task summary response: " + e.getMessage());
             e.printStackTrace();
         }
+        System.out.println("Sending traffic summary");
         // Reset all messaging messageStatistics counters
         messageStatistics.reset();
     }

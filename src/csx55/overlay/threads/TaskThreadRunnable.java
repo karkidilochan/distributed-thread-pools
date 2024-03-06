@@ -45,7 +45,6 @@ public class TaskThreadRunnable implements Runnable {
                 /* increase count for completed tasks */
                 clientNode.getNodeStatistics().addCompleted();
 
-                checkIfEmpty();
 
             } catch (Exception e) {
                 System.out.println("Error mining task:" + e.getMessage());
@@ -55,14 +54,4 @@ public class TaskThreadRunnable implements Runnable {
 
     }
 
-    private synchronized void checkIfEmpty() {
-        boolean roundCompleted = clientNode.getIfRoundComplete();
-        if (!roundCompleted) {
-            if (taskQueue.size() == 0) {
-                roundCompleted = true;
-                clientNode.notifyRoundComplete();
-            }
-        }
-
-    }
 }

@@ -291,25 +291,28 @@ public class Registry implements Node {
      * when all tasks have been completed.
      */
     private synchronized void handleTaskSummary(TrafficSummary summary) {
+        System.out.println("Received task summary");
         completedTasks.getAndIncrement();
+        trafficSummary.add(summary);
 
         if (completedTasks.get() == connections.size()) {
             try {
                 // Sleep for 15 seconds to allow all messages to be received.
-                TimeUnit.SECONDS.sleep(15);
+                TimeUnit.SECONDS.sleep(5);
             } catch (InterruptedException e) {
                 System.out.println("Thread sleep interrupted: " + e.getMessage());
                 e.printStackTrace();
             }
-            trafficSummary.add(summary);
+
+
 
             if (trafficSummary.size() == connections.size()) {
                 display(trafficSummary);
-                trafficSummary.clear();
+//                trafficSummary.clear();
             }
 
             // Finally, reset the completed task count
-            completedTasks.set(0);
+//            completedTasks.set(0);
         }
     }
 
@@ -338,7 +341,7 @@ public class Registry implements Node {
         long totalCompleted = 0;
 
         System.out.println(
-                String.format("\n%1$20s %2$1s %3$1s %4$5s %5$5s %6$5s",
+                String.format( "\n%1$20s %2$12s %3$10s %4$15s %5$15s %6$10s",
                         "",
                         "No. of generated tasks",
                         "No. of pulled tasks",
@@ -347,7 +350,7 @@ public class Registry implements Node {
                         "% of total tasks performed"));
 
         for (TrafficSummary summary : statisticsSummary) {
-            System.out.println(summary.toString());
+//            System.out.println(summary.toString());
             totalGenerated += summary.getGenerated();
             totalPulled += summary.getPulled();
             totalPushed += summary.getPushed();
@@ -358,7 +361,7 @@ public class Registry implements Node {
 
         for (TrafficSummary summary : statisticsSummary) {
             float percentCompleted = (totalCompleted / totalPerformed) * 100;
-            String result = summary.toString() + percentCompleted;
+            String result = summary.toString() + " " + percentCompleted;
             System.out.println(result);
         }
 
